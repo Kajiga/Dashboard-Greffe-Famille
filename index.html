@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Greffe</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<header>
+    <h1>⚖ Dashboard Greffe</h1>
+    <p>Tableau de bord du service</p>
+</header>
+
+<div class="dashboard">
+
+    <section class="card">
+    <h2>👥 Présences de la semaine</h2>
+
+    <table id="presenceTable">
+        <thead>
+            <tr>
+                <th>Agent</th>
+                <th id="jour1">Lun</th>
+<th id="jour2">Mar</th>
+<th id="jour3">Mer</th>
+<th id="jour4">Jeu</th>
+<th id="jour5">Ven</th>
+            </tr>
+        </thead>
+        <tbody id="presenceBody">
+        </tbody>
+    </table>
+
+<ul id="collaborateurs" style="display:none;"></ul>
+
+</section>
+
+    <section class="card">
+        <h2>📌 Échéances à venir</h2>
+        <ul id="todo"></ul>
+    </section>
+
+    <section class="card">
+    <h2>❓ FAQ du greffe</h2>
+
+    <input
+        type="text"
+        id="faqRecherche"
+        placeholder="Mot-clé (BAEC, fixation, appel...)">
+
+    <button onclick="rechercherFAQ()">
+        Rechercher
+    </button>
+
+    <div id="faqResultat">
+        Saisissez un mot-clé.
+    </div>
+</section>
+
+    <section class="card full-width">
+
+        <div class="calendar-top">
+
+            <button onclick="previousMonth()">◀</button>
+
+            <h2 id="monthTitle"></h2>
+
+            <button onclick="nextMonth()">▶</button>
+
+        </div>
+
+        <div class="agenda-link">
+            <button
+                class="agenda-main-btn"
+                onclick="window.open('agenda.html')">
+                📅 Ouvrir l'agenda
+            </button>
+        </div>
+
+        <div class="weekdays">
+            <div>Lun</div>
+            <div>Mar</div>
+            <div>Mer</div>
+            <div>Jeu</div>
+            <div>Ven</div>
+            <div>Sam</div>
+            <div>Dim</div>
+        </div>
+
+        <div id="calendar"></div>
+
+    </section>
+
+    <section class="card">
+        <h2>🎯 Attribution des tâches</h2>
+
+        <select id="listeTaches"></select>
+
+        <select id="listeCollaborateurs"></select>
+
+        <button onclick="attribuer()">
+            Attribuer
+        </button>
+
+        <ul id="attributions"></ul>
+    </section>
+
+    <section class="card">
+        <h2>⭐ Bonus</h2>
+
+        <select id="bonusSelect" onchange="majBonus()">
+            <option>Collaborateurs</option>
+            <option>Tâches</option>
+            <option>Agenda</option>
+        </select>
+
+        <div id="bonusZone"></div>
+    </section>
+
+</div>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+
+button onclick="testSharepoint()">TEST SHAREPOINT</button>
+
+<script>
+function testSharepoint() {
+    window.open(
+        "https://federaljusticebelgium.sharepoint.com/sites/HRCT_TPI_BW_GROUPEFAMILLE_prj/_vti_bin/owssvr.dll?XMLDATA=1&List=6fd363b6-ef6a-4abf-9337-629630cf3389",
+        "_blank"
+    );
+}
+</script>
+</body>
+</html>

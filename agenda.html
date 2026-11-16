@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agenda Greffe</title>
+
+<link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+
+<header>
+    <h1>📅 Agenda du Greffe</h1>
+</header>
+
+<div class="agenda-layout">
+
+    <div class="card full-width">
+
+        <div class="calendar-top">
+
+            <button onclick="previousMonth()">◀</button>
+
+            <h2 id="monthTitle"></h2>
+
+            <button onclick="nextMonth()">▶</button>
+
+        </div>
+
+        <div class="weekdays">
+            <div>Lun</div>
+            <div>Mar</div>
+            <div>Mer</div>
+            <div>Jeu</div>
+            <div>Ven</div>
+            <div>Sam</div>
+            <div>Dim</div>
+        </div>
+
+        <div id="calendar"></div>
+
+    </div>
+
+    <div class="card">
+
+        <h2>📌 Événements du jour</h2>
+
+        <div id="listeJour">
+            Cliquez sur une date
+        </div>
+
+    </div>
+
+</div>
+
+<script src="data.js"></script>
+
+<script>
+
+let agendaSauvegarde =
+JSON.parse(
+    localStorage.getItem("agendaGreffe")
+    ||
+    JSON.stringify(agenda)
+);
+
+let currentDate = new Date();
+
+function renderCalendar(){
+
+    const calendar =
+        document.getElementById("calendar");
+
+    calendar.innerHTML = "";
+
+    const year =
+        currentDate.getFullYear();
+
+    const month =
+        currentDate.getMonth();
+
+    const mois = [
+        "Janvier","Février","Mars","Avril",
+        "Mai","Juin","Juillet","Août",
+        "Septembre","Octobre",
+        "Novembre","Décembre"
+    ];
+
+    document.getElementById("monthTitle").innerText =
+        mois[month] + " " + year;
+
+    let firstDay =
+        new Date(year,month,1).getDay();
+
+    if(firstDay === 0){
+        firstDay = 7;
+    }
+
+    const nbDays =
+        new Date(year,month+1,0).getDate();
+
+    for(let i=1;i<firstDay;i++){
+
+        const vide =
+            document.createElement("div");
+
+        calendar.appendChild(vide);
+    }
+
+    for(let d=1; d<=nbDays; d++){
+
+        const cell =
+            document.createElement("div");
+
+        cell.className = "day";
+
+        const dateString =
+            year + "-" +
+            String(month+1).padStart(2,"0") +
+            "-" +
+            String(d).padStart(2,"0");
+
+        cell.innerHTML =
+            "<strong>"+d+"</strong>";
+
+        agendaSauvegarde.forEach(ev=>{
+
+            if(ev.date===dateString){
+
+                cell.classList.add("event");
+
+                cell.innerHTML += `
+                <div style="
+                    margin-top:5px;
+                    background:#b9d79c;
+                    padding:3px;
+                    font-size:11px;
+                    border-radius:3px;
+                    overflow:hidden;
+                    white-space:nowrap;
+                    text-overflow:ellipsis;">
+                    ${ev.titre}
+                </div>
+                `;
+            }
+
+        });
+
+        cell.onclick = function(){
+
+            afficherJour(dateString);
+
+        };
+
+        calendar.appendChild(cell);
+
+    }
+
+}
+
+function afficherJour(dateChoisie){
+
+    const zone =
+        document.getElementById("listeJour");
+
+    const events =
+        agendaSauvegarde.filter(
+            e => e.date === dateChoisie
+        );
+
+    let html =
+        `<h3>${dateChoisie}</h3>`;
+
+    if(events.length===0){
+
+        html += `
+        Aucun événement
+        <br><br>
+        `;
+
+    }else{
+
+        events.forEach(e=>{
+
+            html += `
+            <div style="
+                margin-bottom:15px;
+                padding:8px;
+                background:#f5f5f5;
+                border-radius:6px;">
+
+                <strong>${e.titre}</strong>
+
+                <br><br>
+
+                ${e.description || ""}
+
+                <br><br>
+
+<button onclick="
+    modifierEvenement(
+        '${e.date}',
+        '${e.titre}'
+    )
+">
+    ✏ Modifier
+</button>
+
+<br><br>
+
+                <button onclick="
+                    supprimerEvenement(
+                        '${e.date}',
+                        '${e.titre}'
+                    )
+                ">
+                    🗑 Supprimer
+                </button>
+
+            </div>
+            `;
+        });
+
+    }
+
+    html += `
+
+<div style="
+    margin-top:15px;
+    padding:12px;
+    background:#f5f5f5;
+    border-radius:6px;">
+
+    <strong>➕ Nouvel événement</strong>
+
+    <br><br>
+
+    <input
+        type="text"
+        id="titreEvent"
+        placeholder="Nouvel événement">
+
+    <br><br>
+
+    <textarea
+        id="descriptionEvent"
+        placeholder="Description"
+        rows="4"
+        style="width:100%;"></textarea>
+
+    <br><br>
+
+    <button onclick="ajouterEventJour('${dateChoisie}')">
+        ➕ Ajouter
+    </button>
+
+<br><br>
+
+<strong>👥 Absence</strong>
+
+<br><br>
+
+<select id="absenceCollaborateur">
+    <option value="">Sélectionner un collaborateur</option>
+    <option>Catherine</option>
+    <option>Lena</option>
+    <option>Chloé</option>
+    <option>Savanna</option>
+    <option>Corine</option>
+<option>Loyd</option>
+
+</select>
+
+<br><br>
+
+<button onclick="ajouterAbsence('${dateChoisie}')">
+    ❌ Enregistrer l'absence
+</button>
+</div>
+`;
+
+    zone.innerHTML = html;
+
+}
+
+function ajouterEventJour(dateChoisie){
+
+    const titre =
+        document.getElementById("titreEvent").value;
+
+    const description =
+        document.getElementById("descriptionEvent").value;
+
+    if(!titre) return;
+
+    agendaSauvegarde.push({
+
+        date : dateChoisie,
+        titre : titre,
+        description : description
+
+    });
+
+    localStorage.setItem(
+        "agendaGreffe",
+        JSON.stringify(agendaSauvegarde)
+    );
+
+    afficherJour(dateChoisie);
+
+    renderCalendar();
+
+}
+
+function ajouterAbsence(dateChoisie){
+
+    const collaborateur =
+        document.getElementById(
+            "absenceCollaborateur"
+        ).value;
+
+    if(!collaborateur){
+        return;
+    }
+
+    agendaSauvegarde.push({
+    date : dateChoisie,
+    titre : "Absence - " + collaborateur,
+    absence : true,
+    collaborateur : collaborateur
+});
+
+    localStorage.setItem(
+        "agendaGreffe",
+        JSON.stringify(agendaSauvegarde)
+    );
+
+    afficherJour(dateChoisie);
+renderCalendar();
+}
+
+function modifierEvenement(date,titre){
+
+    const evenement =
+        agendaSauvegarde.find(
+            e => e.date === date && e.titre === titre
+        );
+
+    if(!evenement) return;
+
+    const nouveauTitre =
+        prompt(
+            "Modifier le titre :",
+            evenement.titre
+        );
+
+    if(nouveauTitre === null) return;
+
+    const nouvelleDescription =
+        prompt(
+            "Modifier la description :",
+            evenement.description || ""
+        );
+
+    if(nouvelleDescription === null) return;
+
+    evenement.titre = nouveauTitre;
+    evenement.description = nouvelleDescription;
+
+    localStorage.setItem(
+        "agendaGreffe",
+        JSON.stringify(agendaSauvegarde)
+    );
+
+    afficherJour(date);
+    renderCalendar();
+
+}
+
+function supprimerEvenement(date,titre){
+
+    if(!confirm("Supprimer cet événement ?")){
+        return;
+    }
+
+    agendaSauvegarde =
+        agendaSauvegarde.filter(
+            e => !(e.date === date && e.titre === titre)
+        );
+
+    localStorage.setItem(
+        "agendaGreffe",
+        JSON.stringify(agendaSauvegarde)
+    );
+
+    afficherJour(date);
+
+    renderCalendar();
+
+}
+
+function previousMonth(){
+
+    currentDate.setMonth(
+        currentDate.getMonth()-1
+    );
+
+    renderCalendar();
+
+}
+
+function nextMonth(){
+
+    currentDate.setMonth(
+        currentDate.getMonth()+1
+    );
+
+    renderCalendar();
+
+}
+
+renderCalendar();
+
+</script>
+
+</body>
+</html>
